@@ -2,17 +2,18 @@ $(document).ready(function(){
 
     var getDatamap,
         remoteData = {},
-        callback;
+        remoteSuccessHandler,
+        popupHandler;
 
     // Function invoked after 'successfully' getting remote data
-    callback = function(data){
+    remoteSuccessHandler = function(data){
         var entry;
         console.log("success");
 
         // Xform data for the Datamap
         data.forEach(function(el){
             entry = {};
-            entry['fillKey'] = 'blue';
+            entry['fillKey'] = el.fill_color;
             entry['reincarcerated'] = el.reincarcerated;
             entry['popAtRisk'] = el.pop_at_risk;
             entry['percent'] = el.percent;
@@ -23,9 +24,22 @@ $(document).ready(function(){
         getDatamap(remoteData);
     };
 
+    map.legend({legendTitle: "Recidivism rate by State"});
+
     // remote request to get data.
     $.get('/state/index.json')
-        .success(callback.bind(this));
+        popupHandler = function(geo, data) {
+         // Markup for the popup
+            return ['<div class="hoverinfo"><strong> ',
+                geo.properties.name,
+                '<br> At Risk Population',
+                ': ' + data.popAtRisk,
+                '<br> Number Re-Incarcerated: ',
+                ': ' + data.reincarcerated,
+                '<br> Percent: ',
+                ': ' + data.percent,
+                '</strong></div>'].join('');
+     };
 
 
     // Draw the map
@@ -34,11 +48,11 @@ $(document).ready(function(){
             element: document.getElementById('container'),
             fills: {
                 // defaultFill: 'rgba(23,48,210,0.9)' //any hex, color name or rgb/rgba value
-                HIGH: '#afafaf',
-                LOW: '#123456',
-                MEDIUM: 'blue',
-                UNKNOWN: 'rgb(0,0,0)',
-                defaultFill: 'green'
+                HIGH: 'red',
+                LOW: 'green',
+                MEDIUM: 'yellow',
+                UNKNOWN: 'gray',
+                defaultFill: 'gray'
             },
             scope: 'usa',
             data: data,
@@ -49,19 +63,10 @@ $(document).ready(function(){
                 // Shb an object with entries for each state, were keys are the 2 char state code.
                 // dataUrl: '/state_recividisms/index.json',
 
-                popupTemplate: function(geo, data) {
-                    // Markup for the popup
-                    return ['<div class="hoverinfo"><strong> ',
-                            geo.properties.name,
-                            '<br> At Risk Population',
-                            ': ' + data.popAtRisk,
-                            '<br> Number Re-Incarcerated: ',
-                            ': ' + data.reincarcerated,
-                            '<br> Percent: ',
-                            ': ' + data.percent,
-                            '</strong></div>'].join('');
-                }
+                popupTemplate: popupHandler
             }
         });
-    }
+    };
+    $.get('/state/index.json')
+        .success(remoteSuccessHandler.bind(this));
 });
