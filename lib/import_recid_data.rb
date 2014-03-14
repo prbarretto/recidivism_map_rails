@@ -12,6 +12,7 @@ class ImportRecid
         state_abbrev = STATES[state_name]
         puts "State row is #{row}"
         State.create!(name: row[0], pop_at_risk: row[1].gsub(/,/,'').to_i, reincarcerated: row[2].gsub(/,/,'').to_i, percent: row[3].to_f, abbreviation: state_abbrev)
+        puts "Last state is #{State.last.inspect}"
       end
     end
   end

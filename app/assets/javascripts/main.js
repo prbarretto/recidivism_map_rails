@@ -24,10 +24,9 @@ $(document).ready(function(){
         getDatamap(remoteData);
     };
 
-    map.legend({legendTitle: "Recidivism rate by State"});
 
     // remote request to get data.
-    $.get('/state/index.json')
+    $.get('/states/index.json')
         popupHandler = function(geo, data) {
          // Markup for the popup
             return ['<div class="hoverinfo"><strong> ',
@@ -66,7 +65,8 @@ $(document).ready(function(){
                 popupTemplate: popupHandler
             }
         });
+        map.legend({legendTitle: "Recidivism rate by State"});
     };
-    $.get('/state/index.json')
+    $.get('/states/index.json')
         .success(remoteSuccessHandler.bind(this));
 });
